@@ -1,0 +1,3 @@
+recursive-include xiaoyu/config/static *.txt *.yaml
+recursive-include xiaoyu/agents/skills *.md
+recursive-include xiaoyu/agents/skills/buildin/mysql-reporter/scripts *.py
