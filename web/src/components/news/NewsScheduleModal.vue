@@ -27,7 +27,7 @@
     <div class="schedule-form" v-else>
       <a-form layout="vertical">
         <a-form-item label="名称">
-          <a-input v-model:value="form.name" placeholder="例: 每日新闻速递" />
+          <a-input v-model:value="form.name" placeholder="例: 每日 AI 速递" />
         </a-form-item>
         <a-form-item label="启用">
           <a-switch v-model:checked="form.enabled" />

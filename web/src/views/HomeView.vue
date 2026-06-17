@@ -11,7 +11,6 @@
       <a-result status="error" :title="error.title" :sub-title="error.message">
         <template #extra>
           <a-button type="primary" @click="retryLoad">重试</a-button>
-          <a-button :href="faqUrl" target="_blank" rel="noopener noreferrer">常见问题</a-button>
         </template>
       </a-result>
     </div>
@@ -36,20 +35,6 @@
           <span class="logo-text">{{ infoStore.organization.name }}</span>
         </div>
         <div class="header-actions">
-          <a
-            class="github-link"
-            href="https://github.com/xerrors/Xiaoyu"
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label="GitHub"
-          >
-            <svg height="20" width="20" viewBox="0 0 16 16" version="1.1">
-              <path
-                fill-rule="evenodd"
-                d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"
-              ></path>
-            </svg>
-          </a>
           <UserInfoComponent :show-button="true" />
         </div>
       </header>
@@ -57,22 +42,6 @@
       <main class="hero-section">
         <div class="hero-layout">
           <div class="hero-content reveal-up">
-            <p v-if="typedBadge" class="hero-badge" :class="{ typing: isBadgeTyping }">
-              <span class="badge-dot"></span>
-              <template v-if="badgeParts.number">
-                <span>{{ badgeParts.prefix }}</span>
-                <a
-                  class="hero-badge-link"
-                  :href="repoUrl"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <span class="hero-badge-number">{{ badgeParts.number }}</span>
-                </a>
-                <span>{{ badgeParts.suffix }}</span>
-              </template>
-              <template v-else>{{ typedBadge }}</template>
-            </p>
             <h1 class="title reveal-up delay-1">{{ infoStore.branding.title }}</h1>
             <Transition name="subtitle-switch" mode="out-in">
               <p v-if="currentSubtitle" class="subtitle" :key="currentSubtitle">
@@ -84,15 +53,6 @@
                 <span>开始体验</span>
                 <ArrowRight :size="18" />
               </button>
-              <a
-                class="button-base secondary"
-                href="https://xerrors.github.io/Xiaoyu/"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <BookText :size="18" />
-                <span>查看文档</span>
-              </a>
             </div>
           </div>
 
@@ -178,19 +138,37 @@
                 <p class="flow-caption">智能体发起检索 · 引擎融合向量与图谱 · 召回知识增强生成</p>
               </div>
 
-              <div class="stat-row" v-if="realtimeStats.length">
-                <div class="stat-item" v-for="stat in realtimeStats" :key="stat.key">
-                  <span class="stat-item-value">
-                    <component :is="stat.icon" :size="15" />
-                    {{ stat.value }}
-                  </span>
-                  <span class="stat-item-label">{{ stat.label }}</span>
-                </div>
-              </div>
             </div>
           </aside>
         </div>
       </main>
+
+      <section class="modules-section">
+        <div class="modules-inner">
+          <h2 class="modules-title">探索应用模块</h2>
+          <p class="modules-subtitle">选择下方模块开始使用</p>
+          <div class="modules-grid">
+            <div
+              v-for="(mod, idx) in modules"
+              :key="idx"
+              class="module-card"
+              :style="{ '--delay': idx * 0.06 + 's' }"
+              @click="goToModule(mod.path)"
+            >
+              <div class="module-card-icon">
+                <component :is="mod.icon" :size="24" />
+              </div>
+              <div class="module-card-body">
+                <h3 class="module-card-name">{{ mod.name }}</h3>
+                <p class="module-card-desc">{{ mod.desc }}</p>
+              </div>
+              <div class="module-card-arrow">
+                <ArrowRight :size="18" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
 
       <footer class="footer">
         <div class="footer-content">
@@ -211,10 +189,10 @@ import { useInfoStore } from '@/stores/info'
 import { healthApi } from '@/apis/system_api'
 import UserInfoComponent from '@/components/UserInfoComponent.vue'
 import {
-  BookText,
-  Star,
-  GitFork,
-  CircleDot,
+  MessageCircle,
+  Newspaper,
+  FolderKanban,
+  LibraryBig,
   ArrowRight,
   Workflow,
   Library,
@@ -224,28 +202,10 @@ import {
 const router = useRouter()
 const userStore = useUserStore()
 const infoStore = useInfoStore()
-const repoUrl = 'https://github.com/xerrors/Xiaoyu'
-const faqUrl = 'https://xerrors.github.io/Xiaoyu/'
 
-// 加载状态
 const isLoading = ref(true)
 const error = ref(null)
-const typedBadge = ref('')
-const isBadgeTyping = ref(false)
-const githubStats = ref(null)
-let badgeTimer = null
 let subtitleTimer = null
-let starsFetchController = null
-
-const GITHUB_REPO_API = 'https://api.github.com/repos/xerrors/Xiaoyu'
-const GITHUB_STARS_TIMEOUT = 3000
-
-const formatStars = (count) => {
-  if (!Number.isFinite(count) || count <= 0) {
-    return ''
-  }
-  return `${count}`
-}
 
 const subtitleIndex = ref(0)
 
@@ -265,23 +225,6 @@ const subtitleOptions = computed(() => {
 })
 
 const currentSubtitle = computed(() => subtitleOptions.value[subtitleIndex.value] || '')
-const badgeParts = computed(() => {
-  const text = typedBadge.value || ''
-  const match = text.match(/^(.*?)(\d[\d,]*\+?)(\s+GitHub Stars.*)?$/)
-  if (!match) {
-    return {
-      prefix: text,
-      number: '',
-      suffix: ''
-    }
-  }
-
-  return {
-    prefix: match[1] || '',
-    number: match[2] || '',
-    suffix: match[3] || ''
-  }
-})
 
 const stopSubtitleCarousel = () => {
   if (subtitleTimer) {
@@ -301,76 +244,6 @@ const startSubtitleCarousel = () => {
   subtitleTimer = setInterval(() => {
     subtitleIndex.value = (subtitleIndex.value + 1) % subtitleOptions.value.length
   }, 2800)
-}
-
-const stopStarsFetch = () => {
-  if (starsFetchController) {
-    starsFetchController.abort()
-    starsFetchController = null
-  }
-}
-
-const fetchGithubRepo = async () => {
-  stopStarsFetch()
-  const controller = new AbortController()
-  starsFetchController = controller
-  const timer = setTimeout(() => {
-    controller.abort()
-  }, GITHUB_STARS_TIMEOUT)
-
-  try {
-    const response = await fetch(GITHUB_REPO_API, { signal: controller.signal })
-    if (!response.ok) {
-      return null
-    }
-
-    const data = await response.json()
-    return {
-      stars: Number(data?.stargazers_count) || 0,
-      forks: Number(data?.forks_count) || 0,
-      issues: Number(data?.open_issues_count) || 0
-    }
-  } catch {
-    return null
-  } finally {
-    clearTimeout(timer)
-    if (starsFetchController === controller) {
-      starsFetchController = null
-    }
-  }
-}
-
-const getHeroBadgeText = (starsCount = null) => {
-  const realtimeStars = formatStars(starsCount)
-  return realtimeStars ? `已获得 ${realtimeStars} GitHub Stars` : ''
-}
-
-const stopBadgeTyping = () => {
-  if (badgeTimer) {
-    clearInterval(badgeTimer)
-    badgeTimer = null
-  }
-  isBadgeTyping.value = false
-}
-
-const startBadgeTyping = (starsCount = null) => {
-  stopBadgeTyping()
-  const text = getHeroBadgeText(starsCount)
-  typedBadge.value = ''
-
-  if (!text) {
-    return
-  }
-
-  let index = 0
-  isBadgeTyping.value = true
-  badgeTimer = setInterval(() => {
-    index += 1
-    typedBadge.value = text.slice(0, index)
-    if (index >= text.length) {
-      stopBadgeTyping()
-    }
-  }, 45)
 }
 
 const checkHealth = async () => {
@@ -393,20 +266,12 @@ const loadData = async () => {
   error.value = null
 
   try {
-    // 先检查健康状态
     await checkHealth()
-    // 健康检查通过后加载配置
     await infoStore.loadInfoConfig()
     startSubtitleCarousel()
-    const repo = await fetchGithubRepo()
-    githubStats.value = repo
-    startBadgeTyping(repo?.stars ?? null)
   } catch (e) {
     console.error('加载失败:', e)
-    stopBadgeTyping()
     stopSubtitleCarousel()
-    stopStarsFetch()
-    typedBadge.value = ''
   } finally {
     isLoading.value = false
   }
@@ -415,6 +280,33 @@ const loadData = async () => {
 const retryLoad = () => {
   loadData()
 }
+
+const modules = [
+  {
+    name: '智能体对话',
+    desc: 'AI 驱动的对话与任务执行',
+    icon: MessageCircle,
+    path: '/agent'
+  },
+  {
+    name: 'AI 速递',
+    desc: '多源信息聚合与智能摘要',
+    icon: Newspaper,
+    path: '/news'
+  },
+  {
+    name: '工作区',
+    desc: '智能体配置与知识编排',
+    icon: FolderKanban,
+    path: '/workspace'
+  },
+  {
+    name: '智能体扩展',
+    desc: '知识库、MCP 与技能管理',
+    icon: LibraryBig,
+    path: '/extensions'
+  }
+]
 
 const goToChat = async () => {
   if (!userStore.isLoggedIn) {
@@ -426,32 +318,21 @@ const goToChat = async () => {
   router.push('/agent')
 }
 
+const goToModule = (path) => {
+  if (!userStore.isLoggedIn) {
+    sessionStorage.setItem('redirect', path)
+    router.push('/login')
+    return
+  }
+  router.push(path)
+}
+
 onMounted(() => {
-  // 加载数据
   loadData()
 })
 
 onUnmounted(() => {
-  stopBadgeTyping()
   stopSubtitleCarousel()
-  stopStarsFetch()
-})
-
-const formatCount = (count) =>
-  Number.isFinite(count) && count >= 0 ? count.toLocaleString('en-US') : ''
-
-// 首页统计直接展示实时的 GitHub 仓库数据，不再依赖 branding 配置
-const realtimeStats = computed(() => {
-  const stats = githubStats.value
-  if (!stats) {
-    return []
-  }
-
-  return [
-    { key: 'stars', label: 'Stars', value: formatCount(stats.stars), icon: Star },
-    { key: 'forks', label: 'Forks', value: formatCount(stats.forks), icon: GitFork },
-    { key: 'issues', label: 'Open Issues', value: formatCount(stats.issues), icon: CircleDot }
-  ]
 })
 </script>
 
@@ -588,31 +469,6 @@ const realtimeStats = computed(() => {
   font-weight: 600;
 }
 
-.github-link {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 38px;
-  height: 38px;
-  border-radius: 10px;
-  text-decoration: none;
-  color: var(--gray-600);
-  border: 1px solid transparent;
-  transition:
-    color 0.2s ease,
-    background 0.2s ease,
-    border-color 0.2s ease;
-
-  &:hover {
-    color: var(--main-700);
-    background: var(--main-30);
-    border-color: var(--main-40);
-  }
-
-  svg {
-    fill: currentColor;
-  }
-}
 
 // Hero
 .hero-section {
@@ -657,57 +513,6 @@ const realtimeStats = computed(() => {
   animation-delay: 220ms;
 }
 
-.hero-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  align-self: flex-start;
-  padding: 0.4rem 0.9rem;
-  border-radius: 999px;
-  background: var(--main-0);
-  border: 1px solid var(--main-40);
-  color: var(--main-700);
-  font-size: 0.85rem;
-  letter-spacing: 0.02em;
-  font-weight: 600;
-  margin: 0;
-  box-shadow: 0 4px 14px -8px rgba(3, 80, 101, 0.4);
-}
-
-.badge-dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: var(--main-500);
-  box-shadow: 0 0 0 4px var(--main-50);
-  flex-shrink: 0;
-}
-
-.hero-badge-link {
-  color: inherit;
-  text-decoration: none;
-}
-
-.hero-badge-number {
-  color: var(--main-700);
-  font-weight: 700;
-  transition: color 0.2s ease;
-}
-
-.hero-badge-link:hover .hero-badge-number {
-  color: var(--main-800);
-}
-
-.hero-badge.typing::after {
-  content: '';
-  display: inline-block;
-  width: 1px;
-  height: 1em;
-  margin-left: 2px;
-  background: var(--main-600);
-  vertical-align: -0.1em;
-  animation: caretBlink 0.8s steps(1, end) infinite;
-}
 
 .title {
   font-size: clamp(2.6rem, 4.4vw, 4.2rem);
@@ -788,22 +593,6 @@ const realtimeStats = computed(() => {
   }
 }
 
-.button-base.secondary {
-  background: var(--main-0);
-  color: var(--main-700);
-  border-color: var(--main-40);
-  padding: 0.5rem 1.6rem;
-
-  :deep(svg) {
-    color: var(--main-600);
-  }
-
-  &:hover {
-    background: var(--main-30);
-    border-color: var(--main-200);
-    color: var(--main-800);
-  }
-}
 
 // Hero 右侧可视化卡片
 .hero-visual {
@@ -982,47 +771,127 @@ const realtimeStats = computed(() => {
   line-height: 1.5;
 }
 
-.stat-row {
+
+// 模块展示区
+.modules-section {
   position: relative;
-  display: flex;
-  margin-top: 1.5rem;
-  padding-top: 1.35rem;
-  border-top: 1px solid var(--main-40);
+  z-index: 1;
+  width: 100%;
+  padding: 0 2rem 4rem;
 }
 
-.stat-item {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 0.3rem;
-
-  &:not(:first-child) {
-    padding-left: 1.2rem;
-  }
-
-  &:not(:last-child) {
-    padding-right: 1.2rem;
-    border-right: 1px solid var(--main-40);
-  }
+.modules-inner {
+  max-width: 760px;
+  margin: 0 auto;
 }
 
-.stat-item-value {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  font-size: 1.3rem;
+.modules-title {
+  font-size: 1.6rem;
   font-weight: 700;
   color: var(--main-800);
-  line-height: 1.1;
+  text-align: center;
+  margin: 0 0 0.4rem;
+}
 
-  :deep(svg) {
-    color: var(--main-500);
+.modules-subtitle {
+  font-size: 0.95rem;
+  color: var(--gray-600);
+  text-align: center;
+  margin: 0 0 2rem;
+}
+
+.modules-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.module-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 18px;
+  border-radius: 14px;
+  background: var(--main-0);
+  border: 1px solid var(--main-40);
+  cursor: pointer;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
+  animation: revealUp 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation-delay: var(--delay);
+  opacity: 0;
+  transform: translateY(12px);
+
+  &:hover {
+    border-color: var(--main-200);
+    box-shadow: 0 8px 24px -12px rgba(3, 80, 101, 0.25);
+    transform: translateY(-2px);
   }
 }
 
-.stat-item-label {
+.module-card-icon {
+  flex-shrink: 0;
+  width: 46px;
+  height: 46px;
+  border-radius: 12px;
+  background: var(--main-30);
+  border: 1px solid var(--main-40);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--main-700);
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease;
+
+  .module-card:hover & {
+    background: var(--main-50);
+    border-color: var(--main-200);
+  }
+}
+
+.module-card-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.module-card-name {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--main-900);
+  margin: 0 0 2px;
+  line-height: 1.3;
+}
+
+.module-card-desc {
   font-size: 0.8rem;
   color: var(--gray-600);
+  margin: 0;
+  line-height: 1.4;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.module-card-arrow {
+  flex-shrink: 0;
+  color: var(--main-400);
+  transition:
+    color 0.2s ease,
+    transform 0.2s ease;
+
+  .module-card:hover & {
+    color: var(--main-600);
+    transform: translateX(3px);
+  }
+}
+
+@media (max-width: 640px) {
+  .modules-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 // 页脚
@@ -1055,11 +924,6 @@ const realtimeStats = computed(() => {
   }
 }
 
-@keyframes caretBlink {
-  50% {
-    opacity: 0;
-  }
-}
 
 @keyframes orbFloat {
   0%,
@@ -1123,39 +987,13 @@ const realtimeStats = computed(() => {
     background: var(--main-5);
   }
 
-  .hero-badge-number {
-    color: var(--main-200);
-  }
+  
 
-  .hero-badge-link:hover .hero-badge-number {
-    color: var(--main-100);
-  }
-
-  .button-base.secondary {
-    color: var(--main-200);
-
-    :deep(svg) {
-      color: var(--main-300);
-    }
-
-    &:hover {
-      color: var(--main-100);
-    }
-  }
-
-  .github-link {
-    color: var(--gray-400);
-
-    &:hover {
-      color: var(--main-200);
-    }
-  }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .reveal-up,
-  .orb,
-  .hero-badge.typing::after {
+  .orb {
     animation: none;
   }
 

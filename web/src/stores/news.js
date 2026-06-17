@@ -56,7 +56,7 @@ export const useNewsStore = defineStore('news', () => {
         digests.value.unshift(digest)
         total.value++
       }
-      message.success('已触发新闻摘要生成')
+      message.success('已触发 AI 速递')
       return digest
     } catch (e) {
       message.error('触发失败: ' + (e.message || '未知错误'))
@@ -71,7 +71,9 @@ export const useNewsStore = defineStore('news', () => {
       if (idx >= 0) {
         digests.value[idx] = { ...digests.value[idx], status: 'cancelled' }
       }
-      currentDigest.value = null
+      if (currentDigest.value && currentDigest.value.id === digestId) {
+        currentDigest.value = { ...currentDigest.value, status: 'cancelled' }
+      }
       message.success('任务已取消')
     } catch (e) {
       message.error('取消失败: ' + (e.message || '未知错误'))

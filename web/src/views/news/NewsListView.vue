@@ -1,6 +1,6 @@
 <template>
   <div class="news-page">
-    <HeaderComponent title="新闻" description="热点检索与摘要管理">
+    <HeaderComponent title="AI 速递" description="热点检索与摘要管理">
       <template #actions>
         <a-tooltip title="手动触发">
           <a-button type="primary" ghost @click="showTriggerModal = true">
@@ -70,12 +70,14 @@
         <template
           v-else-if="currentDigest.status === 'running' || currentDigest.status === 'pending'"
         >
-          <NewsDigestProgress :digest="currentDigest" />
-          <div class="detail-actions">
-            <a-button danger @click="handleCancelDigest(currentDigest.id)">
-              <X class="icon" :size="14" />
-              取消任务
-            </a-button>
+          <div class="detail-running">
+            <NewsDigestProgress :digest="currentDigest" />
+            <div class="detail-actions">
+              <a-button danger @click="handleCancelDigest(currentDigest.id)">
+                <X class="icon" :size="14" />
+                取消任务
+              </a-button>
+            </div>
           </div>
         </template>
 
@@ -312,6 +314,9 @@ async function retryWebhook(id) {
 async function handleCancelDigest(id) {
   stopPolling()
   await store.cancelDigest(id)
+  if (selectedId.value === id) {
+    await store.fetchDigest(id)
+  }
 }
 
 async function handleDeleteDigest(id) {
@@ -437,6 +442,18 @@ async function saveEditedMarkdown() {
   overflow-y: auto;
   padding: 0 var(--page-padding) var(--page-padding);
   background: var(--main-0);
+
+  .detail-running {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+
+    > * {
+      width: 100%;
+    }
+  }
 
   .detail-empty {
     display: flex;

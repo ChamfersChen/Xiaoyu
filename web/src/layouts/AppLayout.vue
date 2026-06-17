@@ -4,6 +4,7 @@ import { RouterLink, RouterView, useRoute, useRouter } from 'vue-router'
 import { GithubOutlined } from '@ant-design/icons-vue'
 import {
   BarChart3,
+  ChevronDown,
   ClipboardList,
   LibraryBig,
   Box,
@@ -53,6 +54,7 @@ const showSettingsModal = ref(false)
 const settingsInitialTab = ref('')
 
 const { sidebarCollapsed } = storeToRefs(chatUIStore)
+const appsExpanded = ref(true)
 
 // Provide settings modal methods to child components
 const openSettingsModal = (tab) => {
@@ -141,10 +143,11 @@ const mainList = computed(() => {
   })
 
   items.push({
-    name: '新闻',
+    name: 'AI 速递',
     path: '/news',
     icon: Newspaper,
-    activeIcon: Newspaper
+    activeIcon: Newspaper,
+    group: 'apps'
   })
 
   items.push({
@@ -286,10 +289,10 @@ provide('settingsModal', {
         </button>
       </div>
       <div class="nav">
-        <!-- 使用mainList渲染导航项 -->
+        <!-- 主功能项 -->
         <RouterLink
-          v-for="(item, index) in mainList"
-          :key="index"
+          v-for="(item, index) in mainList.filter((i) => i.group !== 'apps')"
+          :key="'main-' + index"
           :to="item.path"
           v-show="!item.hidden"
           class="nav-item"
@@ -307,6 +310,29 @@ provide('settingsModal', {
           </a-tooltip>
           <span class="nav-text">{{ item.name }}</span>
         </RouterLink>
+
+        <!-- 应用分组 (折叠态显示为图标) -->
+        <template v-if="sidebarCollapsed">
+          <RouterLink
+            v-for="(item, index) in mainList.filter((i) => i.group === 'apps')"
+            :key="'app-' + index"
+            :to="item.path"
+            v-show="!item.hidden"
+            class="nav-item"
+            :class="{ active: isNavItemActive(item) }"
+            @click.stop
+          >
+            <a-tooltip placement="right">
+              <template #title>{{ item.name }}</template>
+              <component
+                class="icon"
+                :is="isNavItemActive(item) ? item.activeIcon : item.icon"
+                size="18"
+              />
+            </a-tooltip>
+            <span class="nav-text">{{ item.name }}</span>
+          </RouterLink>
+        </template>
       </div>
       <div class="fill">
         <ConversationNavSection
@@ -322,6 +348,32 @@ provide('settingsModal', {
           @toggle-pin="handleTogglePinChat"
           @load-more-chats="() => chatThreadsStore.loadMoreThreads()"
         />
+
+        <!-- 应用分组 -->
+        <div v-if="!sidebarCollapsed" class="apps-section">
+          <div class="apps-header" @click="appsExpanded = !appsExpanded">
+            <ChevronDown class="apps-chevron" :class="{ collapsed: !appsExpanded }" size="16" />
+            <span class="apps-title">应用</span>
+          </div>
+          <div v-show="appsExpanded" class="apps-body">
+            <RouterLink
+              v-for="(item, index) in mainList.filter((i) => i.group === 'apps')"
+              :key="'app-' + index"
+              :to="item.path"
+              v-show="!item.hidden"
+              class="nav-item"
+              :class="{ active: isNavItemActive(item) }"
+              @click.stop
+            >
+              <component
+                class="icon"
+                :is="isNavItemActive(item) ? item.activeIcon : item.icon"
+                size="18"
+              />
+              <span class="nav-text">{{ item.name }}</span>
+            </RouterLink>
+          </div>
+        </div>
       </div>
       <div class="foo">
         <div class="github nav-item" @click.stop>
@@ -448,8 +500,53 @@ div.header,
     gap: 4px;
   }
 
+  .apps-section {
+    margin-top: 8px;
+    border-top: 1px solid var(--gray-150);
+    padding-top: 4px;
+  }
+
+  .apps-header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    height: @sidebar-item-height;
+    padding: 0 @sidebar-item-padding-x;
+    cursor: pointer;
+    border-radius: 8px;
+    color: var(--gray-500);
+    font-size: 12px;
+    font-weight: 500;
+    user-select: none;
+
+    &:hover {
+      background-color: var(--main-20);
+      color: var(--gray-700);
+    }
+  }
+
+  .apps-chevron {
+    flex-shrink: 0;
+    transition: transform 0.18s ease;
+
+    &.collapsed {
+      transform: rotate(-90deg);
+    }
+  }
+
+  .apps-title {
+    line-height: 20px;
+  }
+
+  .apps-body {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin-top: 2px;
+  }
+
   .sidebar-conversations {
-    height: 100%;
+    flex: 1 1 0;
     min-height: 0;
     overflow: hidden;
   }
@@ -464,6 +561,8 @@ div.header,
   .fill {
     flex: 1 1 0;
     min-height: 0;
+    display: flex;
+    flex-direction: column;
   }
 
   .sidebar-brand {

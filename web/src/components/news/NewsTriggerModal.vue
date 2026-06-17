@@ -1,7 +1,7 @@
 <template>
   <a-modal
     v-model:open="visible"
-    title="触发新闻摘要"
+    title="触发 AI 速递"
     width="640px"
     @ok="handleTrigger"
     :confirmLoading="triggering"
