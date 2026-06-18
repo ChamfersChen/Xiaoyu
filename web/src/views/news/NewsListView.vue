@@ -1,6 +1,6 @@
 <template>
   <div class="news-page">
-    <HeaderComponent title="AI 速递" description="热点检索与摘要管理">
+    <PageHeader title="AI 速递" :show-border="true">
       <template #actions>
         <a-tooltip title="手动触发">
           <a-button type="primary" ghost @click="showTriggerModal = true">
@@ -15,7 +15,7 @@
           </a-button>
         </a-tooltip>
       </template>
-    </HeaderComponent>
+    </PageHeader>
 
     <div class="news-body">
       <div class="news-sidebar">
@@ -197,7 +197,7 @@
 import { ref, computed, onMounted, watch } from 'vue'
 import { useNewsStore } from '@/stores/news'
 import { newsApi } from '@/apis'
-import HeaderComponent from '@/components/HeaderComponent.vue'
+import PageHeader from '@/components/shared/PageHeader.vue'
 import MarkdownPreview from '@/components/common/MarkdownPreview.vue'
 import NewsDigestProgress from '@/components/news/NewsDigestProgress.vue'
 import NewsTriggerModal from '@/components/news/NewsTriggerModal.vue'

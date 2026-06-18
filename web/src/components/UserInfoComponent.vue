@@ -33,10 +33,6 @@
             </div>
           </a-menu-item>
           <a-menu-divider />
-          <a-menu-item key="docs" @click="openDocs">
-            <template #icon><BookOpen :size="16" /></template>
-            <span class="menu-text">文档中心</span>
-          </a-menu-item>
           <a-menu-item key="theme" @click="toggleTheme">
             <template #icon>
               <Sun v-if="themeStore.isDark" :size="16" />
@@ -131,9 +127,6 @@ const goToLogin = () => {
   router.push('/login')
 }
 
-const openDocs = () => {
-  window.open('https://xerrors.github.io/Xiaoyu/', '_blank', 'noopener,noreferrer')
-}
 
 const toggleTheme = () => {
   themeStore.toggleTheme()

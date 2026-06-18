@@ -80,23 +80,6 @@
               <X :size="14" />
             </button>
           </div>
-          <p class="star-card-title">给 Xiaoyu 点个 Star</p>
-          <p class="star-card-description">
-            如果这个项目帮到了你，欢迎去 GitHub 点亮一个 Star，让更多人看到它。
-          </p>
-          <a
-            class="star-card-link"
-            :href="projectRepoUrl"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <img
-              class="star-card-link-image"
-              src="https://img.shields.io/github/stars/xerrors/Xiaoyu?label=Xiaoyu&style=social"
-              alt="GitHub stars for Xiaoyu"
-            />
-            <ExternalLink :size="13" />
-          </a>
         </div>
       </div>
 
@@ -209,7 +192,6 @@ const activeTab = ref('account')
 const showStarCard = ref(true)
 
 const STAR_CARD_STORAGE_KEY = 'xiaoyu-settings-star-card-dismissed'
-const projectRepoUrl = 'https://github.com/xerrors/Xiaoyu'
 
 const visible = computed({
   get: () => props.visible,

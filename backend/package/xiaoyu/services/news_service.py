@@ -44,12 +44,13 @@ def _build_source_config(raw: dict | None) -> SourcesConfig:
     return SourcesConfig(**raw)
 
 
-def _build_ai_config(model_spec: str | None) -> AIConfig:
+def _build_ai_config(model_spec: str | None, languages:list[str]=['zh']) -> AIConfig:
     return AIConfig(
         provider=AIProvider.OPENAI,
         model="unused",
         api_key_env="UNUSED",
         base_url="http://localhost",
+        languages=languages
     )
 
 
@@ -182,7 +183,7 @@ class NewsService:
                 return XiaoyuAIClient(model_spec=spec, json_mode=json_mode)
 
             hor_config = Config(
-                ai=_build_ai_config(model_spec),
+                ai=_build_ai_config(model_spec, languages=[language]),
                 sources=_build_source_config(source_config),
                 filtering=FilteringConfig(ai_score_threshold=ai_score_threshold),
             )
