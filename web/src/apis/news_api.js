@@ -12,6 +12,7 @@ export const newsApi = {
   deleteDigest: (id) => apiDelete(`/api/news/digests/${id}`),
   regenerateMarkdown: (id) => apiPost(`/api/news/digests/${id}/regenerate`),
   retryWebhook: (id) => apiPost(`/api/news/digests/${id}/webhook/retry`),
+  deliverWebhook: (id, data) => apiPost(`/api/news/digests/${id}/webhook/deliver`, data),
 
   listSchedules: () => apiGet('/api/news/schedules'),
   createSchedule: (data) => apiPost('/api/news/schedules', data),

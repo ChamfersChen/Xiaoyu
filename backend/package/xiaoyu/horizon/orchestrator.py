@@ -168,14 +168,17 @@ class HorizonOrchestrator:
 
                 # Send webhook notification if configured (Xiaoyu-managed)
                 if self.webhook_notifier:
-                    await self.webhook_notifier.send_daily_summary(
-                        summary=summary,
-                        important_items=important_items,
-                        all_items_count=len(all_items),
-                        date=today,
-                        lang=lang,
-                        summarizer=summarizer,
-                    )
+                    try:
+                        await self.webhook_notifier.send_daily_summary(
+                            summary=summary,
+                            important_items=important_items,
+                            all_items_count=len(all_items),
+                            date=today,
+                            lang=lang,
+                            summarizer=summarizer,
+                        )
+                    except Exception as e:
+                        logger.warning(f"Webhook delivery failed (pipeline continues): {e}")
 
             logger.info("✅ Horizon completed successfully!")
             usage = get_usage_snapshot()
@@ -203,10 +206,13 @@ class HorizonOrchestrator:
 
             # Send webhook failure notification if configured
             if self.webhook_notifier:
-                await self.webhook_notifier.send_failure(
-                    date=datetime.now(timezone.utc).strftime("%Y-%m-%d"),
-                    error_message=str(e),
-                )
+                try:
+                    await self.webhook_notifier.send_failure(
+                        date=datetime.now(timezone.utc).strftime("%Y-%m-%d"),
+                        error_message=str(e),
+                    )
+                except Exception:
+                    logger.exception("Webhook failure notification failed (original error follows)")
 
             raise
 

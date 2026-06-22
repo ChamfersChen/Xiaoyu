@@ -288,6 +288,23 @@ class WebhookNotifier:
         # env var exists — validate the URL value (strip + scheme + hostname + httpx check)
         self.url = self._validate_url(raw_url)
 
+    def _default_request_body(self) -> dict | None:
+        """返回平台默认的请求体，当未配置 request_body 时使用。"""
+        if _is_feishu_platform(self.config.platform):
+            return {
+                "msg_type": "interactive",
+                "card": {
+                    "header": {
+                        "title": {"tag": "plain_text", "content": "#{message_title}"},
+                        "template": "blue",
+                    },
+                    "elements": [
+                        {"tag": "markdown", "content": "#{summary}"},
+                    ],
+                },
+            }
+        return {"text": "#{summary}"}
+
     def _render_request_components(
         self, variables: dict
     ) -> tuple[str, str | None, dict[str, str]]:
@@ -297,6 +314,8 @@ class WebhookNotifier:
         content_type = "application/x-www-form-urlencoded"
         body_content = None
         raw_body = variables.get("_request_body_override", self.config.request_body)
+        if raw_body is None:
+            raw_body = self._default_request_body()
         body_variables = _prepare_variables_for_body(raw_body, variables)
 
         if raw_body:
@@ -540,6 +559,10 @@ class WebhookNotifier:
         Args:
             variables: Dict of template variable values to replace
                        in URL, request_body, and headers.
+
+        Raises:
+            ValueError: If the webhook request fails or the platform
+                        returns an error code.
         """
         if not self.config.enabled:
             logger.info("Webhook is disabled, skipping notification.")
@@ -575,21 +598,24 @@ class WebhookNotifier:
                         content=body_content.encode("utf-8"),
                         headers=headers,
                     )
-
-            self._handle_response_status(response, safe_url)
-
         except httpx.InvalidURL as e:
-            logger.info(f"Webhook URL is invalid: {e}")
+            msg = f"Webhook URL is invalid: {e}"
             logger.error("Webhook URL invalid: %s, env var: %s", e, self.config.url_env)
+            raise ValueError(msg) from e
         except httpx.ConnectError as e:
-            logger.info(f"Webhook connection failed: {e}")
+            msg = f"Webhook connection failed: {e}"
             logger.error("Webhook connection failed: URL=%s, error=%s", safe_url, e)
+            raise ValueError(msg) from e
         except httpx.TimeoutException as e:
-            logger.info(f"Webhook request timed out: {e}")
+            msg = f"Webhook request timed out: {e}"
             logger.error("Webhook timeout: URL=%s, error=%s", safe_url, e)
+            raise ValueError(msg) from e
         except Exception as e:
-            logger.info(f"Webhook call failed unexpectedly: {type(e).__name__}: {e}")
+            msg = f"Webhook call failed: {type(e).__name__}: {e}"
             logger.error("Webhook unexpected error: URL=%s, type=%s, error=%s", safe_url, type(e).__name__, e)
+            raise ValueError(msg) from e
+
+        self._handle_response_status(response, safe_url)
 
     def _check_body_error_code(self, body: str) -> Optional[str]:
         """Check if a 2xx response body contains a platform-specific error code.
@@ -632,6 +658,9 @@ class WebhookNotifier:
         Even 2xx responses may contain platform-specific error codes
         in the JSON body (e.g. Feishu code=19001, DingTalk errcode=400,
         Slack ok=false).
+
+        Raises:
+            ValueError: If the response indicates delivery failure.
         """
         status = response.status_code
         body = response.text[:500]
@@ -647,6 +676,7 @@ class WebhookNotifier:
                     f"Webhook response (status={status}): {body} "
                     f"{error_hint}"
                 )
+                raise ValueError(error_hint)
             else:
                 logger.info("Webhook sent OK. URL: %s, body: %s", safe_url, body)
                 logger.info(f"Webhook response (status={status}): {body}")
@@ -659,21 +689,25 @@ class WebhookNotifier:
                 "Webhook redirect: URL=%s, status=%d, location=%s",
                 safe_url, status, location,
             )
+            raise ValueError(f"Webhook redirect (status={status}) to {location}")
         elif 400 <= status < 500:
             logger.info(f"Webhook client error (status={status}): {response.text[:500]}")
             logger.error(
                 "Webhook client error: URL=%s, status=%d, body=%s",
                 safe_url, status, response.text[:500],
             )
+            raise ValueError(f"Webhook client error (status={status}): {body}")
         elif 500 <= status < 600:
             logger.info(f"Webhook server error (status={status}): {response.text[:500]}")
             logger.error(
                 "Webhook server error: URL=%s, status=%d, body=%s",
                 safe_url, status, response.text[:500],
             )
+            raise ValueError(f"Webhook server error (status={status}): {body}")
         else:
             logger.info(f"Webhook unexpected status={status}: {response.text[:500]}")
             logger.error("Webhook unexpected status: URL=%s, status=%d", safe_url, status)
+            raise ValueError(f"Webhook unexpected status (status={status})")
 
     async def send_daily_summary(
         self,

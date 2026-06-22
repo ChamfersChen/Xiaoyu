@@ -494,6 +494,53 @@ class NewsService:
             )
             return {"status": "failed", "error": str(e)}
 
+    async def deliver_to_webhook(self, digest_id: str, url: str, platform: str = "generic") -> dict | None:
+        """一次性投递摘要到指定的 webhook URL（不持久化配置）。"""
+        digest = await self.digest_repo.get_by_id(digest_id)
+        if not digest:
+            return None
+
+        try:
+            from xiaoyu.horizon.models import WebhookConfig as HWConfig, ContentItem
+
+            wc = HWConfig(
+                url_env="NEWS_WEBHOOK_URL",
+                platform=platform,
+                delivery="summary",
+                layout="markdown",
+                enabled=True,
+            )
+
+            import os
+
+            os.environ["NEWS_WEBHOOK_URL"] = url
+
+            notifier = WebhookNotifier(wc)
+
+            items = []
+            for raw_item in digest.items or []:
+                try:
+                    item = ContentItem(**{k: v for k, v in raw_item.items() if k in ContentItem.model_fields})
+                    items.append(item)
+                except Exception:
+                    continue
+
+            summarizer = DailySummarizer()
+            await notifier.send_daily_summary(
+                summary=digest.raw_markdown or "",
+                important_items=items,
+                all_items_count=digest.total_fetched or 0,
+                date=digest.digest_date.isoformat() if digest.digest_date else date.today().isoformat(),
+                lang=digest.language or "zh",
+                summarizer=summarizer,
+            )
+
+            return {"status": "success"}
+
+        except Exception as e:
+            logger.error(f"One-off webhook delivery failed for digest {digest_id}: {e}", exc_info=True)
+            return {"status": "failed", "error": str(e)}
+
     async def _update_status(self, digest_id: str, status: str, **kwargs) -> None:
         data = {"status": status, **kwargs}
         await self.digest_repo.update(digest_id, data)

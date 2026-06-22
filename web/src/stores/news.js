@@ -159,6 +159,11 @@ export const useNewsStore = defineStore('news', () => {
     }
   }
 
+  async function deliverWebhook(digestId, data) {
+    const resp = await newsApi.deliverWebhook(digestId, data)
+    return resp.data
+  }
+
   async function fetchSchedules() {
     schedulesLoading.value = true
     try {
@@ -225,6 +230,7 @@ export const useNewsStore = defineStore('news', () => {
     updateDigestMarkdown,
     regenerateMarkdown,
     retryWebhook,
+    deliverWebhook,
     fetchSchedules,
     createSchedule,
     updateSchedule,

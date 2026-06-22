@@ -117,6 +117,10 @@
                 <a-button size="small" @click="regenerateMarkdown(currentDigest.id)"
                   >重新生成</a-button
                 >
+                <a-button size="small" @click="showWebhookDeliveryModal = true">
+                  <Send class="icon" :size="14" />
+                  投递
+                </a-button>
                 <a-popconfirm
                   title="确认删除该摘要?"
                   description="删除后不可恢复"
@@ -190,6 +194,10 @@
 
     <NewsTriggerModal v-model:open="showTriggerModal" @done="onTriggerDone" />
     <NewsScheduleModal v-model:open="showScheduleModal" />
+    <NewsWebhookDeliveryModal
+      v-model:open="showWebhookDeliveryModal"
+      :digest-id="currentDigest?.id"
+    />
   </div>
 </template>
 
@@ -203,12 +211,14 @@ import NewsDigestProgress from '@/components/news/NewsDigestProgress.vue'
 import NewsTriggerModal from '@/components/news/NewsTriggerModal.vue'
 import NewsScheduleModal from '@/components/news/NewsScheduleModal.vue'
 import NewsItemEditor from '@/components/news/NewsItemEditor.vue'
-import { Zap, Clock, FileText, Download, Trash2, X } from 'lucide-vue-next'
+import NewsWebhookDeliveryModal from '@/components/news/NewsWebhookDeliveryModal.vue'
+import { Zap, Clock, FileText, Download, Trash2, X, Send } from 'lucide-vue-next'
 import { message } from 'ant-design-vue'
 
 const store = useNewsStore()
 const showTriggerModal = ref(false)
 const showScheduleModal = ref(false)
+const showWebhookDeliveryModal = ref(false)
 const selectedId = ref(null)
 const editMode = ref('preview')
 const editModeOptions = [

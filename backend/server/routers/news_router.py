@@ -57,6 +57,11 @@ class UpdateSchedulePayload(BaseModel):
     webhook_config: dict | None = None
 
 
+class DeliverWebhookPayload(BaseModel):
+    url: str = Field(..., description="Webhook URL")
+    platform: str = Field("generic", description="平台类型")
+
+
 # ── Digest endpoints ──────────────────────────────────────────
 
 
@@ -249,6 +254,20 @@ async def retry_webhook(
     """重试 Webhook 投递"""
     service = NewsService()
     result = await service.deliver_webhook(digest_id)
+    if result is None:
+        raise HTTPException(status_code=404, detail="Digest not found")
+    return {"success": True, "data": result}
+
+
+@news.post("/digests/{digest_id}/webhook/deliver")
+async def deliver_webhook(
+    digest_id: str,
+    payload: DeliverWebhookPayload,
+    current_user: User = Depends(get_required_user),
+):
+    """一次性投递摘要到指定的 webhook URL"""
+    service = NewsService()
+    result = await service.deliver_to_webhook(digest_id, url=payload.url, platform=payload.platform)
     if result is None:
         raise HTTPException(status_code=404, detail="Digest not found")
     return {"success": True, "data": result}
