@@ -183,9 +183,8 @@
             <NewsItemEditor
               v-for="(item, idx) in currentDigest.items"
               :key="idx"
-              :digest-id="currentDigest.id"
               :item="item"
-              :index="idx"
+              :index="idx + 1"
             />
           </div>
         </template>

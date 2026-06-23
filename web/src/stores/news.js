@@ -38,6 +38,12 @@ export const useNewsStore = defineStore('news', () => {
     try {
       const resp = await newsApi.getDigest(id)
       currentDigest.value = resp.data || null
+      if (currentDigest.value) {
+        const idx = digests.value.findIndex((d) => d.id === id)
+        if (idx >= 0) {
+          digests.value[idx] = { ...digests.value[idx], ...currentDigest.value }
+        }
+      }
       return currentDigest.value
     } catch (e) {
       console.error('Failed to fetch digest:', e)

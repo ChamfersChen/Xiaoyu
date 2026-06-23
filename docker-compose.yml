@@ -53,7 +53,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
       - nltk_data:/root/nltk_data  # 使用命名卷持久化NLTK数据，避免路径展开差异
     ports:
-      - "5050:5050"
+      - "5051:5050"
     networks:
       - app-network
     extra_hosts:
@@ -133,7 +133,7 @@ services:
       - ./docker/sandbox_provisioner/sandbox.env:/app/sandbox.env:ro
       - /var/run/docker.sock:/var/run/docker.sock
     ports:
-      - "8002:8002"
+      - "8003:8002"
     networks:
       - app-network
     extra_hosts:
@@ -205,8 +205,8 @@ services:
     image: neo4j:5.26
     container_name: graph
     ports:
-      - "7474:7474"
-      - "7687:7687"
+      - "7475:7474"
+      - "7688:7687"
     volumes:
       - ./docker/volumes/neo4j/data:/data
       - ./docker/volumes/neo4j/logs:/var/lib/neo4j/logs
@@ -264,8 +264,8 @@ services:
       retries: 5
       start_period: 30s
     ports:
-      - "9000:9000"
-      - "9001:9001"
+      - "9001:9000"
+      - "9002:9001"
     networks:
       - app-network
     restart: unless-stopped
@@ -290,8 +290,8 @@ services:
       timeout: 30s
       retries: 5
     ports:
-      - "19530:19530"
-      - "9091:9091"
+      - "19531:19530"
+      - "9092:9091"
     depends_on:
       - "etcd"
       - "minio"
@@ -303,7 +303,7 @@ services:
     image: postgres:16
     container_name: postgres
     ports:
-      - "5432:5432"
+      - "5433:5432"
     environment:
       - POSTGRES_USER=${POSTGRES_USER:-postgres}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-postgres}
@@ -324,7 +324,7 @@ services:
     image: redis:7-alpine
     container_name: redis
     ports:
-      - "6379:6379"
+      - "6380:6379"
     command: redis-server --appendonly yes
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]

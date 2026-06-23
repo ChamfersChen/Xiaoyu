@@ -118,39 +118,183 @@ const saving = ref(false)
 
 const defaultSourceConfig = {
   sources: {
-    hackernews: { enabled: true, fetch_top_stories: 20, min_score: 100 },
+    github: [
+      {
+        type: 'repo_releases',
+        owner: 'vllm-project',
+        repo: 'vllm',
+        enabled: true
+      },
+      {
+        type: 'repo_releases',
+        owner: 'ollama',
+        repo: 'ollama',
+        enabled: true
+      },
+      {
+        type: 'repo_releases',
+        owner: 'langchain-ai',
+        repo: 'langgraph',
+        enabled: true
+      },
+      {
+        type: 'repo_releases',
+        owner: 'open-webui',
+        repo: 'open-webui',
+        enabled: true
+      },
+      {
+        type: 'repo_releases',
+        owner: 'microsoft',
+        repo: 'autogen',
+        enabled: true
+      },
+      {
+        type: 'repo_releases',
+        owner: 'crewAIInc',
+        repo: 'crewAI',
+        enabled: true
+      }
+    ],
+
+    hackernews: {
+      enabled: true,
+      fetch_top_stories: 50,
+      min_score: 80
+    },
+
     rss: [
       {
         name: 'Simon Willison',
         url: 'https://simonwillison.net/atom/everything/',
         enabled: true,
-        category: 'ai-tools'
+        category: 'ai'
+      },
+      {
+        name: 'Latent Space',
+        url: 'https://www.latent.space/feed',
+        enabled: true,
+        category: 'ai'
+      },
+      {
+        name: 'Sebastian Raschka',
+        url: 'https://magazine.sebastianraschka.com/feed',
+        enabled: true,
+        category: 'llm'
+      },
+      {
+        name: 'Anthropic News',
+        url: 'https://www.anthropic.com/news/rss.xml',
+        enabled: true,
+        category: 'model'
+      },
+      {
+        name: 'OpenAI Blog',
+        url: 'https://openai.com/news/rss.xml',
+        enabled: true,
+        category: 'model'
+      },
+      {
+        name: 'Google DeepMind',
+        url: 'https://deepmind.google/discover/blog/rss.xml',
+        enabled: true,
+        category: 'research'
+      },
+      {
+        name: 'Hugging Face Blog',
+        url: 'https://huggingface.co/blog/feed.xml',
+        enabled: true,
+        category: 'open-source-ai'
       }
     ],
+
     reddit: {
       enabled: true,
       subreddits: [
+        {
+          subreddit: 'LocalLLaMA',
+          enabled: true,
+          sort: 'hot',
+          time_filter: 'day',
+          fetch_limit: 30,
+          min_score: 20
+        },
         {
           subreddit: 'MachineLearning',
           enabled: true,
           sort: 'hot',
           time_filter: 'day',
-          fetch_limit: 15,
+          fetch_limit: 20,
           min_score: 50
+        },
+        {
+          subreddit: 'singularity',
+          enabled: true,
+          sort: 'hot',
+          time_filter: 'day',
+          fetch_limit: 20,
+          min_score: 50
+        },
+        {
+          subreddit: 'OpenAI',
+          enabled: true,
+          sort: 'hot',
+          time_filter: 'day',
+          fetch_limit: 20,
+          min_score: 30
         }
       ],
-      fetch_comments: 5
+      users: [],
+      fetch_comments: 10
+    },
+
+    twitter: {
+      enabled: true,
+      users: [
+        'karpathy',
+        'swyx',
+        'ylecun',
+        'jeremyphoward',
+        'AndrewYNg',
+        'sama',
+        'AnthropicAI',
+        'OpenAI',
+        'GoogleDeepMind'
+      ],
+      fetch_limit: 20,
+      fetch_reply_text: true,
+      max_replies_per_tweet: 5,
+      max_tweets_to_expand: 20,
+      reply_min_likes: 20
+    },
+
+    ossinsight: {
+      enabled: true,
+      period: 'past_24_hours',
+      languages: ['Python', 'TypeScript', 'Rust'],
+      keywords: ['llm', 'agent', 'mcp', 'rag', 'ai', 'gpt', 'claude', 'qwen', 'deepseek'],
+      min_stars: 20,
+      max_items: 50
     }
   },
+
   filtering: {
-    ai_score_threshold: 6.0,
+    ai_score_threshold: 7.5,
     time_window_hours: 24,
-    max_items: null,
-    category_groups: {},
-    default_group: 'other',
-    default_group_limit: null
+    max_items: 50,
+
+    category_groups: {
+      model: 10,
+      research: 10,
+      agent: 10,
+      'open-source-ai': 15,
+      industry: 10
+    },
+
+    default_group: 'industry',
+    default_group_limit: 10
   }
-}
+};
 
 const form = reactive({
   name: 'default',
