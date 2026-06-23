@@ -355,7 +355,7 @@ class EmailConfig(BaseModel):
     smtp_username: Optional[str] = None
     email_address: str
     password_env: str = "EMAIL_PASSWORD"
-    sender_name: str = "Horizon Daily"
+    sender_name: str = "Daily"
     subscribe_keyword: str = "SUBSCRIBE"
     unsubscribe_keyword: str = "UNSUBSCRIBE"
     enabled: bool = False

@@ -354,23 +354,23 @@ class WebhookNotifier:
         if lang == "zh":
             if item_count == 0:
                 return (
-                    f"# Horizon 每日速递 - {date}\n\n"
+                    f"# 每日速递 - {date}\n\n"
                     f"> 已分析 {all_items_count} 条内容，暂无达到重要性阈值的资讯。"
                 )
             return (
-                f"# Horizon 每日速递 - {date}\n\n"
+                f"# 每日速递 - {date}\n\n"
                 f"> 从 {all_items_count} 条内容中筛选出 {item_count} 条重要资讯。\n\n"
                 "点击下方新闻面板即可在飞书内展开阅读全文。"
             )
 
         if item_count == 0:
             return (
-                f"# Horizon Daily - {date}\n\n"
+                f"# Daily - {date}\n\n"
                 f"> Analyzed {all_items_count} items, but none met the importance threshold."
             )
 
         return (
-            f"# Horizon Daily - {date}\n\n"
+            f"# Daily - {date}\n\n"
             f"> Selected {item_count} important items from {all_items_count} fetched items.\n\n"
             "Expand the panels below to read the full briefing inside Feishu/Lark."
         )
