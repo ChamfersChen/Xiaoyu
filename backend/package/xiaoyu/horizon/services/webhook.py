@@ -421,9 +421,9 @@ class WebhookNotifier:
                     "title": {
                         "tag": "plain_text",
                         "content": (
-                            f"Horizon {date} 折叠日报"
+                            f"{date} 折叠日报"
                             if lang == "zh"
-                            else f"Horizon {date} Collapsible Daily"
+                            else f"{date} Collapsible Daily"
                         ),
                     },
                     "template": "blue",
@@ -471,9 +471,9 @@ class WebhookNotifier:
                 {
                     **base_vars,
                     "message_title": (
-                        f"Horizon {date} 折叠日报"
+                        f"{date} 折叠日报"
                         if lang == "zh"
-                        else f"Horizon {date} Collapsible Daily"
+                        else f"{date} Collapsible Daily"
                     ),
                     "message_kind": "collapsible",
                     "summary": self._build_feishu_collapsible_overview(
@@ -504,9 +504,9 @@ class WebhookNotifier:
             overview_message = {
                 **base_vars,
                 "message_title": (
-                    f"Horizon {date} 总览"
+                    f"{date} 总览"
                     if lang == "zh"
-                    else f"Horizon {date} Overview"
+                    else f"{date} Overview"
                 ),
                 "message_kind": "overview",
                 "summary": overview,
@@ -542,7 +542,7 @@ class WebhookNotifier:
             {
                 **base_vars,
                 "message_title": (
-                    f"Horizon {date} 日报" if lang == "zh" else f"Horizon {date} Daily"
+                    f"{date} 日报" if lang == "zh" else f"{date} Daily"
                 ),
                 "message_kind": "summary",
                 "summary": summary,
